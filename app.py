@@ -10,17 +10,48 @@ from tensorflow.keras.applications.xception import preprocess_input
 
 app = Flask(__name__)
 
-UPLOAD_FOLDER = "static/uploads"
+# =========================
+# PATH
+# =========================
+BASE_DIR = os.path.dirname(os.path.abspath(__file__))
+
+MODEL_PATH = os.path.join(BASE_DIR, "model", "model.keras")
+CLASS_PATH = os.path.join(BASE_DIR, "model", "class_names.pkl")
+UPLOAD_FOLDER = os.path.join(BASE_DIR, "static", "uploads")
+
+os.makedirs(UPLOAD_FOLDER, exist_ok=True)
+
 app.config["UPLOAD_FOLDER"] = UPLOAD_FOLDER
 
-os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
+# =========================
+# LOAD MODEL
+# =========================
+model = load_model(MODEL_PATH)
 
-model = load_model("model/model.keras")
-
-with open("model/class_names.pkl", "rb") as f:
+with open(CLASS_PATH, "rb") as f:
     class_names = pickle.load(f)
 
 
+# =========================
+# PREDICT FUNCTION
+# =========================
+def predict_image(img_path):
+    img = image.load_img(img_path, target_size=(224, 224))
+    img = image.img_to_array(img)
+    img = np.expand_dims(img, axis=0)
+    img = preprocess_input(img)
+
+    pred = model.predict(img, verbose=0)
+
+    idx = np.argmax(pred)
+    confidence = float(np.max(pred)) * 100
+
+    return class_names[idx], confidence
+
+
+# =========================
+# ROUTE
+# =========================
 @app.route("/", methods=["GET", "POST"])
 def index():
 
@@ -30,24 +61,21 @@ def index():
 
     if request.method == "POST":
 
+        if "image" not in request.files:
+            return render_template("index.html")
+
         file = request.files["image"]
 
-        if file:
+        if file.filename == "":
+            return render_template("index.html")
 
-            filename = file.filename
-            filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
+        filename = os.path.basename(file.filename)
 
-            file.save(filepath)
+        filepath = os.path.join(app.config["UPLOAD_FOLDER"], filename)
 
-            img = image.load_img(filepath, target_size=(224, 224))
-            img = image.img_to_array(img)
-            img = np.expand_dims(img, axis=0)
-            img = preprocess_input(img)
+        file.save(filepath)
 
-            pred = model.predict(img, verbose=0)
-
-            prediction = class_names[np.argmax(pred)]
-            confidence = round(np.max(pred) * 100, 2)
+        prediction, confidence = predict_image(filepath)
 
     return render_template(
         "index.html",
