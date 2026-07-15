@@ -1,0 +1,71 @@
+{% extends 'base.html' %}
+
+{% block content %}
+
+<div class="container py-5">
+
+    <div class="card shadow-lg p-5 mx-auto" style="max-width:700px;">
+
+        <h1 class="text-center mb-3">
+            🌸 Flower Classification AI
+        </h1>
+
+        <p class="text-center text-muted">
+            Transfer Learning XCeption
+        </p>
+
+        <form method="POST" enctype="multipart/form-data">
+
+            <input
+                class="form-control mb-3"
+                type="file"
+                name="image"
+                required>
+
+            <button class="btn btn-primary w-100">
+
+                Predict Flower
+
+            </button>
+
+        </form>
+
+        {% if filename %}
+
+        <hr>
+
+        <img
+            src="{{ url_for('static', filename='uploads/' + filename) }}"
+            class="img-fluid rounded mb-4">
+
+        <h3>
+
+            Prediction
+
+        </h3>
+
+        <h2 class="text-success">
+
+            {{ prediction }}
+
+        </h2>
+
+        <div class="progress mt-3">
+
+            <div
+                class="progress-bar"
+                style="width: {{ confidence }}%;">
+
+                {{ confidence }} %
+
+            </div>
+
+        </div>
+
+        {% endif %}
+
+    </div>
+
+</div>
+
+{% endblock %}

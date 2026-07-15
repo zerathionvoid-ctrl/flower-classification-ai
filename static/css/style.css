@@ -1,0 +1,37 @@
+body{
+
+    background:linear-gradient(135deg,#f8f5ff,#ffeef7);
+
+    min-height:100vh;
+
+}
+
+.card{
+
+    border:none;
+
+    border-radius:20px;
+
+}
+
+.btn-primary{
+
+    border-radius:12px;
+
+}
+
+.progress{
+
+    height:30px;
+
+    border-radius:20px;
+
+}
+
+.progress-bar{
+
+    font-size:16px;
+
+    font-weight:bold;
+
+}
